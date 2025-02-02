@@ -14,6 +14,7 @@ let page = 1;
 let searchedQuery = '';
 let perPage = 15;
 let totalHits = 0;
+
 loadBtn.classList.add('is-hidden');
 
 const lightbox = new SimpleLightbox('./js-gallery a', {
