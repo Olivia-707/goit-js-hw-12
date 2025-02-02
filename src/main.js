@@ -69,6 +69,9 @@ searchFormEl.addEventListener('submit', onSearchFormSubmit);
 
 const onLoadMoreBtn = async () => {
   try {
+    setTimeout(() => {
+      loader.classList.remove('show-loader');
+    }, 500);
     loader.classList.add('show-loader');
     page++;
     const { data } = await fetchPhotosByQuery(searchedQuery, page);

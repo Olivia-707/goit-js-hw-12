@@ -98,6 +98,18 @@ a {
 
 }
 
+.text-info {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  padding-left: 0%;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background-color: #ffffff;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
 .gallery {
   display: flex;
   flex-wrap: wrap;
@@ -160,7 +172,7 @@ a {
   width: 100%;
 }
 
-.card:hover {
+.gallery-card:hover {
   transform: translateY(-10px);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
