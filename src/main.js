@@ -1,120 +1,134 @@
+import './js/pixabay-api';
+import './js/render-functions';
 import iziToast from 'izitoast';
-import SimpleLightbox from 'simplelightbox';
 import 'izitoast/dist/css/iziToast.min.css';
-import 'simplelightbox/dist/simple-lightbox.min.css';
-import { createGalleryCardTemplate } from './js/render-functions';
-import { fetchPhotosByQuery } from './js/pixabay-api';
+import { userRequest } from './js/pixabay-api';
+import { renderMarkup } from './js/render-functions';
+import { gallery } from './js/render-functions';
+import xmarkSvg from './img/xmark.svg';
+import attendSvg from './img/attend.svg';
 
-const searchFormEl = document.querySelector('.js-search-form');
-const galleryEl = document.querySelector('.js-gallery');
+const searchForm = document.querySelector('.search-form');
 const loader = document.querySelector('.loader');
-const loadBtn = document.querySelector('.js-load-btn');
+const loadMoreBtn = document.querySelector('.load-more-btn');
 
+let userInputValue;
 let page = 1;
-let searchedQuery = '';
-let perPage = 15;
-let totalHits = 0;
+let per_page = 15;
 
-loadBtn.classList.add('is-hidden');
+const showLoader = () => {
+  loader.style.display = 'block';
+};
 
-const lightbox = new SimpleLightbox('.js-gallery a', {
-  captionDelay: 300,
-  captionsData: 'alt',
-});
+const hideLoader = () => {
+  loader.style.display = 'none';
+};
 
-const onSearchFormSubmit = async event => {
-  try {
-    event.preventDefault();
+const endOfGallery = (totalImage, totalHits) => {
+  if (totalImage >= totalHits) {
+    loadMoreBtn.style.display = 'none';
 
-    searchedQuery = searchFormEl.elements[0].value.trim();
-
-    if (searchedQuery === '') {
-      iziToast.error({
-        message: 'Plese enter your request',
-        position: 'topRight',
-      });
-      return;
-    }
-
-    page = 1;
-    loadBtn.classList.add('is-hidden');
-    loader.classList.add('show-loader');
-
-    const { data } = await fetchPhotosByQuery(searchedQuery, page);
-    totalHits = data.totalHits;
-
-    if (data.total === 0) {
-      iziToast.error({
-        message:
-          'Sorry, there are no images matching your searh query. Please try again!',
-        position: 'topRight',
-      });
-
-      galleryEl.innerHTML = '';
-      searchFormEl.reset();
-
-      return;
-    }
-
-    if (data.totalHits > 1) {
-      loadBtn.classList.remove('is-hidden');
-      loadBtn.addEventListener('click', onLoadMoreBtn);
-    }
-
-    const galleryTemplate = data.hits
-      .map(el => createGalleryCardTemplate(el))
-      .join('');
-
-    galleryEl.innerHTML = galleryTemplate;
-    lightbox.refresh();
-  } catch (err) {
-    console.log(err);
-  } finally {
-    loader.classList.remove('show-loader');
+    iziToast.show({
+      message: `We're sorry, but you've reached the end of search results.`,
+      messageColor: '#ffffff',
+      iconUrl: attendSvg,
+      backgroundColor: '#ff7300',
+      position: 'topRight',
+    });
   }
 };
 
-searchFormEl.addEventListener('submit', onSearchFormSubmit);
+searchForm.addEventListener('submit', e => {
+  e.preventDefault();
+  loadMoreBtn.style.display = 'none';
 
-const onLoadMoreBtn = async () => {
-  try {
-    setTimeout(() => {
-      loader.classList.remove('show-loader');
-    }, 500);
-    loader.classList.add('show-loader');
-    page++;
+  gallery.innerHTML = '';
 
-    const { data } = await fetchPhotosByQuery(searchedQuery, page);
+  userInputValue = e.target.elements.search.value.trim().toLowerCase();
 
-    const galleryTemplate = data.hits
-      .map(el => createGalleryCardTemplate(el))
-      .join('');
-    galleryEl.insertAdjacentHTML('beforeend', galleryTemplate);
-    lightbox.refresh();
-    loader.classList.remove('show-loader');
+  if (userInputValue === '') {
+    iziToast.show({
+      message: 'Input field cannot be empty.',
+      messageColor: '#ffffff',
+      iconUrl: xmarkSvg,
+      backgroundColor: '#ff0745',
+      position: 'topRight',
+    });
+    return;
+  }
 
-    const imgBox = document
-      .querySelector('.gallery-card')
-      .getBoundingClientRect();
-    let imgHeight = imgBox.height;
+  showLoader();
 
-    window.scrollBy({
-      top: imgHeight * 2,
-      behavior: 'smooth',
+  page = 1;
+  userRequest(userInputValue, page, per_page)
+    .then(images => {
+      if (images.hits.lengh === 0) {
+        iziToast.show({
+          message:
+            'Sorry, there are no images matching your search query. Please try again!',
+          messageColor: '#ffffff',
+          backgroundColor: '#ff0745',
+          iconUrl: xmarkSvg,
+          position: 'topRight',
+        });
+        return;
+      }
+
+      loadMoreBtn.style.display = 'block';
+
+      endOfGallery(page * per_page, images.totalHits);
+
+      renderMarkup(images.hits);
+    })
+    .catch(error => {
+      iziToast.show({
+        message: `${error}`,
+        messageColor: '#ffffff',
+        backgroundColor: '#ff0745',
+        iconUrl: xmarkSvg,
+        position: 'topRight',
+      });
+      console.log(error);
+    })
+    .finally(() => {
+      hideLoader();
     });
 
-    if (page * perPage >= totalHits) {
-      loadBtn.classList.add('is-hidden');
-      iziToast.info({
-        message: "We're sorry, but you're reached the end of search results.",
+  searchForm.reset();
+});
+
+loadMoreBtn.addEventListener('click', e => {
+  loadMoreBtn.style.display = 'none';
+  page += 1;
+
+  showLoader();
+  userRequest(userInputValue, page, per_page)
+    .then(images => {
+      loadMoreBtn.style.display = 'block';
+
+      endOfGallery(page * per_page, images.totalHits);
+
+      renderMarkup(images.hits);
+
+      const galleryCard = document.querySelector('.gallery-item');
+      const galleryCardRect = galleryCard.getBoundingClientRect();
+
+      window.scrollBy({
+        top: galleryCardRect.height * 2,
+        behavior: 'smooth',
+      });
+    })
+    .catch(error => {
+      iziToast.show({
+        message: `${error}`,
+        messageColor: '#ffffff',
+        backgroundColor: '#ff0745',
+        iconUrl: xmarkSvg,
         position: 'topRight',
       });
-
-      if (!loadBtn.classList.contains('is-hidden')) {
-        loadBtn.removeEventListener('click', onLoadMoreBtn);
-      }
-    }
-  } catch (err) {
-    console.log(err);
-  }
-};
+      console.log(error);
+    })
+    .finally(() => {
+      hideLoader();
+    });
+});

@@ -1,27 +1,49 @@
-export const createGalleryCardTemplate = imgInfo => {
-  return `
-    <li class="gallery-card">
-      <a class="gallery-link" href="${imgInfo.largeImageURL}">
-        <img class="gallery-img" src="${imgInfo.webformatURL}" alt="${imgInfo.tags}" />
-      </a>
-      <ul class="text-info">
-        <li class="image-info">
-          <h4>Likes</h4>
-          <p>${imgInfo.likes}</p>
-        </li>
-        <li class="image-info">
-          <h4>Views</h4>
-          <p>${imgInfo.views}</p>
-        </li>
-        <li class="image-info">
-          <h4>Comments</h4>
-          <p>${imgInfo.comments}</p>
-        </li>
-        <li class="image-info">
-          <h4>Downloads</h4>
-          <p>${imgInfo.downloads}</p>
-        </li>
-      </ul>
-    </li>
-  `;
+import SimpleLightbox from 'simplelightbox';
+import 'simplelightbox/dist/simple-lightbox.min.css';
+
+const modalSimpleLightBox = new SimpleLightbox('.gallery a', {
+  captions: true,
+  captionsData: 'alt',
+  captionDelay: 250,
+});
+
+export const gallery = document.querySelector('.gallery');
+
+export const renderMarkup = images => {
+  const markup = images
+    .map(
+      image => `
+      <li class="gallery-item">
+        <a class="gallery-link" href="${image.largeImageURL}">
+          <img 
+          class="gallery-image"
+          src="${image.webformatURL}"
+          alt="${image.tags}"
+          />
+        </a>
+        <div class="start-container">
+          <div>
+            <span class="start-span"><b>Likes</b></span>
+            <span class="start-span">${image.likes}</span>
+          </div>
+          <div>
+            <span class="start-span"><b>Views</b></span>
+            <span class="start-span">${image.views}</span>
+          </div>
+          <div>
+            <span class="start-span"><b>Comments</b></span>
+            <span class="start-span">${image.comments}</span>
+          </div>
+          <div>
+            <span class="start-span"><b>Downloads</b></span>
+            <span class="start-span">${image.downloads}</span>
+          </div>
+        </div>
+      </li>
+    `
+    )
+    .join('');
+  gallery.insertAdjacentHTML('beforeend', markup);
+
+  modalSimpleLightBox.refresh();
 };
