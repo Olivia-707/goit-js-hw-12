@@ -124,94 +124,76 @@ img {
 
 .loader {
   position: relative;
-  width: 78px;
-  height: 78px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
-  box-sizing: border-box;
-  background: #fff;
-  border: 8px solid #131a1d;
-  overflow: hidden;
-  box-sizing: border-box;
+  border: 8px solid transparent;
+  border-top: 8px solid #4e75ff;
+  border-right: 8px solid #6c8cff;
+  animation: spin 1.5s linear infinite;
   margin: 0 auto;
 }
 
 .loader::after {
   content: '';
   position: absolute;
-  left: 0;
-  top: -50%;
   width: 100%;
   height: 100%;
-  background: #263238;
-  z-index: 5;
-  border-bottom: 8px solid #131a1d;
-  box-sizing: border-box;
-  animation: eyeShade 3s infinite;
+  border-radius: 50%;
+  border: 6px solid rgba(78, 117, 255, 0.5);
+  border-left-color: transparent;
+  border-bottom-color: transparent;
+  animation: pulse 1.5s linear infinite;
 }
 
 .loader::before {
   content: '';
   position: absolute;
-  left: 20px;
-  bottom: 15px;
-  width: 32px;
-  z-index: 2;
-  height: 32px;
-  background: #111;
+  left: 50%;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  background: #4e75ff;
   border-radius: 50%;
-  animation: eyeMove 3s infinite;
+  transform: translate(-50%, -50%);
+  animation: bounce 1s ease-in-out infinite;
 }
 
-@keyframes eyeShade {
+@keyframes spin {
   0% {
-    transform: translateY(0);
-  }
-
-  20% {
-    transform: translateY(5px);
-  }
-
-  40%,
-  50% {
-    transform: translateY(-5px);
-  }
-
-  60% {
-    transform: translateY(-8px);
-  }
-
-  75% {
-    transform: translateY(5px);
+    transform: rotate(0deg);
   }
 
   100% {
-    transform: translateY(10px);
+    transform: rotate(360deg);
   }
 }
 
-@keyframes eyeMove {
+@keyframes pulse {
   0% {
-    transform: translate(0, 0);
+    transform: scale(1);
+    opacity: 1;
   }
 
-  20% {
-    transform: translate(0px, 5px);
-  }
-
-  40%,
   50% {
-    transform: translate(0px, -5px);
-  }
-
-  60% {
-    transform: translate(-10px, -5px);
-  }
-
-  75% {
-    transform: translate(-20px, 5px);
+    transform: scale(1.2);
+    opacity: 0.5;
   }
 
   100% {
-    transform: translate(0, 10px);
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes bounce {
+
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  50% {
+    transform: translate(-50%, -60%) scale(1.2);
   }
 }
